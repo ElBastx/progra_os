@@ -1,0 +1,44 @@
+#!/usr/bin/bash
+afficher_synopsis() {
+    echo -e "Utilisation : $0 [fichier] [uid_depart]" >&2
+    echo -e "  fichier    : Fichier sur lequel baser la recherche (défaut : ./passwd)" >&2
+    echo -e "  uid_depart : Nombre entier positif pour initialiser la recherche (défaut : 1)" >&2
+}
+if (("$#" >= 3)); then
+    echo -e "Erreur : Nombre de paramètres incorrect (2 maximum)." >&2
+    afficher_synopsis
+    exit 2
+fi
+if [ -n "$1" ]; then
+    fichier="$1"
+else
+    fichier="./passwd"
+fi
+if [ ! -f "$fichier" ]; then
+    echo -e "Erreur : Le fichier '$fichier' est introuvable ou n'est pas un fichier régulier." >&2
+    exit 2
+fi
+if [ ! -r "$fichier" ]; then
+    echo -e "Erreur : Le fichier '$fichier' n'est pas accessible en lecture." >&2
+    exit 2
+fi
+start=1
+if [ -n "$2" ]; then
+    if (("$2" >= 0 )); then
+        start="$2"
+    else
+        echo -e "Erreur : Le paramètre de départ ('$2') doit être un nombre entier positif." >&2
+        afficher_synopsis >&2 
+        exit 3
+    fi
+fi
+uids_existants=$(cut -d: -f3 "$fichier")
+echo -e "Analyse du fichier : $fichier"
+for i in $(seq "$start" 65535); do
+    if ! echo "$uids_existants" | grep -qw "$i"; then
+        nextFreeUID=$i
+        echo -e "Prochain UID disponible : $i"
+        break
+    fi
+done
+exit 0
