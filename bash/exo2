@@ -1,0 +1,28 @@
+#!/usr/bin/bash
+compteurRobert=0; compteurTest=0; compteurRoot=0; compteurInconnus=0
+echo -e "Nombre de paramètres: $#\n"
+for param in "$@"; do
+    case "$param" in
+        robert)
+            echo "Bonjour Robert"
+            ((compteurRobert++))
+            ;;
+        test)
+            echo "Ceci est un compte test"
+            ((compteurTest++))
+            ;;
+        root)
+            echo "Bienvenue cher administrateur"
+            ((compteurRoot++))
+            ;;
+        *)
+            echo "Ce paramètre est inconnu ($param)."
+            ((compteurInconnus++))
+            ;;
+    esac
+done
+echo -e "robert : $compteurRobert | test : $compteurTest | root : $compteurRoot | inconnus : $compteurInconnus"
+if ((compteurInconnus > 0)); then
+    exit 1
+fi
+exit 0
