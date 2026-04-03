@@ -1,29 +1,42 @@
-#!/usr/bin/bash
+#!/bin/bash
+
+afficher_synopsis() {
+    echo -e "Utilisation : $0 -u <utilisateur>" >&2
+}
 
 file="/etc/passwd"
+
+if [[ $# -eq 0 ]]; then
+    afficher_synopsis
+    exit 1
+fi
 
 while getopts "u:" opt; do
     case $opt in
     u)
         user="${OPTARG}"
-        user_shell=$(grep $user $file | cut -d: -f7)
-        user_uid=$(grep $user $file | cut -d: -f3)
+        user_line=$(grep "^${user}:" "$file")
 
-        if [[ -z ${user_shell} ]]; then
+        if [[ -z "${user_line}" ]]; then
             echo -e "Utilisateur inexistant"
             exit 2
+        fi
 
-        elif [[ "$user_uid" -lt 1000 ]]; then
-            echo -e "Erreur : Utilisateur normaux uniquement"
+        user_uid=$(cut -d: -f3 <<< "$user_line")
+        user_shell=$(cut -d: -f7 <<< "$user_line")
+
+        if [[ "${user_uid}" -lt 1000 ]]; then
+            echo -e "Erreur : l'utilisateur ${user} (UID ${user_uid} est un compte système)"
+            exit 3
 
         else
             echo -e "Shell par défaut de l'utilisateur ${user} : ${user_shell}"
         fi
-    ;;
+        ;;
     *)
-        cut -d: -f1 $file
+        afficher_synopsis
         exit 1
-    ;;
+        ;;
     esac
 done
 exit 0
