@@ -1,0 +1,94 @@
+#!/usr/bin/bash
+afficher_synopsis() {
+    echo "Synopsis: $0 [-f file] [-m min] [-M max] [-u] [-n nb] [-c] [-h]"
+    echo ""
+    echo "Options:"
+    echo "  -f <file>   Fichier passwd (défaut: ./passwd)"
+    echo "  -m <id>     UID minimum (défaut: 0)"
+    echo "  -M <id>     UID maximum (défaut: 65535)"
+    echo "  -u          Utilisateurs normaux uniquement (UID >= 1000)"
+    echo "  -n <nb>     Afficher les <nb> premiers UID trouvés"
+    echo "  -c          Force les UID à être consécutifs (nécessite -n)"
+    echo "  -h          Affiche cette aide et quitte"
+}
+fichier='./passwd'
+minUID=1
+maxUID=65535
+nb_id=1
+consecutif=FALSE
+while getopts "f:m:M:n:uhc" opt; do
+    case $opt in
+    f)
+        echo -e "Fichier personnalisé"
+        fichier="$OPTARG"
+        if [ ! -f "$fichier" ]; then
+            echo -e "Erreur : Le fichier '$fichier' est introuvable ou n'est pas un fichier régulier." >&2
+            exit 1
+        fi
+        if [ ! -r "$fichier" ]; then
+            echo -e "Erreur : Le fichier '$fichier' n'est pas accessible en lecture." >&2
+            exit 1
+        fi
+        ;;
+    m)
+        if (("$OPTARG" >= 0)); then
+            minUID="$OPTARG"
+        else
+            echo -e "Erreur : L'argument ('$OPTARG') doit être un nombre entier positif." >&2
+        fi
+        ;;
+    M)
+        if (("$OPTARG" >= 0 && "$OPTARG" <= 65535)); then
+            maxUID="$OPTARG"
+        else
+            echo -e "Erreur : L'argument' ('$OPTARG') doit être un nombre entier entre positif 0 et 65535." >&2
+            exit 1
+        fi
+        ;;
+    u)
+        minUID=1000
+        ;;
+    n)
+        nb_id="$OPTARG"
+        ;;
+    h)
+        afficher_synopsis
+        exit 0
+        ;;
+    c)
+        consecutif=TRUE
+        ;;
+    *)
+        echo -e "Option ${OPTARG} invalide." >&2
+        exit 1
+        ;;
+    esac
+done
+uids_existants=$(cut -d: -f3 "$fichier")
+trouve=0
+resultats=()
+for i in $(seq "$minUID" "$maxUID"); do
+    
+    if ! echo "$uids_existants" | grep -qw "$i"; then
+        resultats+=("$i")
+        ((trouve++))
+        
+        if [ "$trouve" -ge "$nb_id" ]; then
+            break
+        fi
+    else
+        if [ "$consecutif" = "TRUE" ]; then
+            trouve=0
+            resultats=()
+        fi
+    fi
+done
+if [ "$trouve" -eq "$nb_id" ]; then
+    for id in "${resultats[@]}"; do
+        echo "Prochain UID disponible : $id"
+    done
+else
+    echo "Erreur : Impossible de trouver $nb_id UID(s) libres (consécutifs: $consecutif) dans la plage $minUID-$maxUID"
+    exit 1
+fi
+exit 0
