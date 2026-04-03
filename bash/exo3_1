@@ -1,0 +1,16 @@
+#!/usr/bin/bash
+if (("$#" < 1)); then
+    echo -e "Utilisation : $0 <uid1> [uid2] [uid3]..." >&2
+    echo -e "Erreur : Le nombre de paramètres doit être supérieur ou égal à 1." >&2
+    exit 1
+fi
+statut_sortie=0
+for uid in "$@"; do
+    if ((uid < 1000)); then
+        echo -e "$uid: UID invalide" >&2
+        statut_sortie=2
+    else
+        echo -e "$uid: UID valide"
+    fi
+done
+exit "$statut_sortie"
