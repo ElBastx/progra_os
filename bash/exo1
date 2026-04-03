@@ -1,0 +1,14 @@
+#!/usr/bin/bash
+export PUBLIC_VAR="1000$ de Bash s'il vous-plaît."
+var_interne="Programmation des systèmes"
+
+if [ ! -v "PUBLIC_VAR" ]; then
+    echo "Erreur : La variable globale n'existe pas" >&2 && exit 1
+
+elif [ -z "$PUBLIC_VAR" ]; then
+    echo "Erreur : Variable globale vide" >&2 && exit 2
+else
+    echo "${var_interne} et ${PUBLIC_VAR}"
+fi
+
+exit 0
