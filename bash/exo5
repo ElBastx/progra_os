@@ -7,8 +7,15 @@ afficher_synopsis() {
 file="/etc/passwd"
 
 if [[ $# -eq 0 ]]; then
-    afficher_synopsis
-    exit 1
+    while read -r line; do
+        uid=$(cut -d: -f3 <<<"$line")
+        if [[ "$uid" -ge 1000 ]]; then
+            nom=$(cut -d: -f1 <<<"$line")
+            shell=$(cut -d: -f7 <<<"$line") 
+            echo -e "${nom} : ${shell}"
+        fi
+    done < "$file"
+    exit 0
 fi
 
 while getopts "u:" opt; do
@@ -26,7 +33,7 @@ while getopts "u:" opt; do
         user_shell=$(cut -d: -f7 <<< "$user_line")
 
         if [[ "${user_uid}" -lt 1000 ]]; then
-            echo -e "Erreur : l'utilisateur ${user} (UID ${user_uid} est un compte système)"
+            echo -e "Erreur : l'utilisateur ${user} (UID ${user_uid}) est un compte système"
             exit 3
 
         else
