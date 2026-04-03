@@ -1,0 +1,29 @@
+#!/usr/bin/bash
+
+file="/etc/passwd"
+
+while getopts "u:" opt; do
+    case $opt in
+    u)
+        user="${OPTARG}"
+        user_shell=$(grep $user $file | cut -d: -f7)
+        user_uid=$(grep $user $file | cut -d: -f3)
+
+        if [[ -z ${user_shell} ]]; then
+            echo -e "Utilisateur inexistant"
+            exit 2
+
+        elif [[ "$user_uid" -lt 1000 ]]; then
+            echo -e "Erreur : Utilisateur normaux uniquement"
+
+        else
+            echo -e "Shell par défaut de l'utilisateur ${user} : ${user_shell}"
+        fi
+    ;;
+    *)
+        cut -d: -f1 $file
+        exit 1
+    ;;
+    esac
+done
+exit 0
