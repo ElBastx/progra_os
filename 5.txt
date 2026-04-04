@@ -1,0 +1,11 @@
+Ex 5 - Lister les comptes utilisateur
+Base
+
+Réaliser un script qui liste les comptes utilisateurs normaux du système, c’est à dire les utilisateurs dont le UID (3ème colonne dans le fichier /etc/passwd) est supérieur à 1000 (ou 500 selon la distribution).
+Shell
+
+Le script doit également indiquer le shell par défaut de l’utilisateur.
+Options
+
+Le script accepte l’option à argument -u user permettant d’afficher le shell par défaut de l’utilisateur user. 
+Si l’utilisateur n’existe pas ou si ce dernier n’est pas un utilisateur normal (UID inférieur à 1000 ou 500 selon le cas), le script retourne différents codes d’erreur.
